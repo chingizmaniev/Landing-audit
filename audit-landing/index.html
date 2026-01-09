@@ -1,1 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бесплатный AI-аудит лендинга</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #1f2937;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-weight: 500;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #8B5CF6;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #8B5CF6, #3B82F6);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #8B5CF6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+        .audit-content {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Бесплатный AI-аудит лендинга</h1>
+        
+        <form id="auditForm">
+            <div class="form-group">
+                <label for="url">URL вашего лендинга *</label>
+                <input type="url" id="url" required placeholder="https://example.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email для получения отчета *</label>
+                <input type="email" id="email" required placeholder="your@email.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="niche">Ниша бизнеса *</label>
+                <input type="text" id="niche" required placeholder="Например: недвижимость, финтех">
+            </div>
+            
+            <div class="form-group">
+                <label for="language">Язык аудита *</label>
+                <select id="language" required>
+                    <option value="ru">Русский</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+            
+            <button type="submit">Получить аудит</button>
+        </form>
+        
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #6b7280;">Анализируем ваш лендинг...</p>
+        </div>
+        
+        <div class="results" id="results">
+            <div class="audit-content" id="auditContent"></div>
+        </div>
+    </div>
 
+    <script>
+        document.getElementById('auditForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const form = this;
+            const loader = document.getElementById('loader');
+            const results = document.getElementById('results');
+            const auditContent = document.getElementById('auditContent');
+            const submitBtn = form.querySelector('button');
+            
+            results.style.display = 'none';
+            loader.style.display = 'block';
+            submitBtn.disabled = true;
+            
+            const formData = {
+                url: document.getElementById('url').value,
+                email: document.getElementById('email').value,
+                niche: document.getElementById('niche').value,
+                language: document.getElementById('language').value
+            };
+            
+            try {
+                const response = await fetch('https://chingiz-n8n.yango-connect.ru/webhook/8f22af66-e7ce-45cc-8c58-48ff0c6e50e5', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                loader.style.display = 'none';
+                results.style.display = 'block';
+                
+                if (data.html) {
+                    auditContent.innerHTML = data.html;
+                } else if (data.audit) {
+                    auditContent.innerHTML = data.audit;
+                } else {
+                    auditContent.innerHTML = '<p>Результат получен, но формат не распознан. Проверьте email для полного отчета.</p>';
+                }
+                
+            } catch (error) {
+                loader.style.display = 'none';
+                results.style.display = 'block';
+                auditContent.innerHTML = '<p style="color: #ef4444;">Ошибка при получении аудита. Попробуйте позже.</p>';
+                console.error('Error:', error);
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
